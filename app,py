@@ -1,0 +1,70 @@
+import json
+import tkinter as tk
+from tkinter import filedialog
+from html import escape
+
+def json_to_html_table(json_data):
+    def create_table(data):
+        html = '<table class="data-table">\n'
+        html += '<tr>'
+        for key in data.keys():
+            html += f'<th>{escape(key)}</th>'
+        html += '</tr>\n'
+        
+        html += '<tr>'
+        for key in data.keys():
+            html += f'<td>{escape(str(data[key]))}</td>'
+        html += '</tr>\n'
+        
+        html += '</table>\n'
+        return html
+
+    if isinstance(json_data, dict):
+        return create_table(json_data)
+    else:
+        raise ValueError('Unsupported JSON data type')
+
+def open_file():
+    filepath = filedialog.askopenfilename(
+        filetypes=[("JSON files", "*.json"), ("All files", "*.*")]
+    )
+    if not filepath:
+        return
+    with open(filepath, 'r') as f:
+        json_data = json.load(f)
+
+    html_content = json_to_html_table(json_data)
+    save_file(html_content)
+
+def save_file(html_content):
+    filepath = filedialog.asksaveasfilename(
+        defaultextension=".html",
+        filetypes=[("HTML files", "*.html"), ("All files", "*.*")]
+    )
+    if not filepath:
+        return
+    with open(filepath, 'w') as f:
+        f.write('<!DOCTYPE html>\n<html lang="en">\n<head>\n')
+        f.write('<meta charset="UTF-8">\n')
+        f.write('<meta name="viewport" content="width=device-width, initial-scale=1.0">\n')
+        f.write('<title>JSON to HTML Table</title>\n')
+        f.write('<style>\n')
+        f.write('body { font-family: Arial, sans-serif; margin: 20px; }\n')
+        f.write('table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }\n')
+        f.write('th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }\n')
+        f.write('th { background-color: #f4f4f4; }\n')
+        f.write('tr:nth-child(even) { background-color: #f9f9f9; }\n')
+        f.write('tr:hover { background-color: #f1f1f1; }\n')
+        f.write('.data-table { border: 2px solid #4CAF50; }\n')
+        f.write('</style>\n')
+        f.write('</head>\n<body>\n')
+        f.write(html_content)
+        f.write('</body>\n</html>\n')
+
+def main():
+    root = tk.Tk()
+    root.withdraw()  
+    open_file()
+
+if __name__ == '__main__':
+    main()
